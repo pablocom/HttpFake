@@ -11,7 +11,7 @@ public sealed class SampleWebApplicationFactory : WebApplicationFactory<IAssembl
     {
         builder.ConfigureTestServices(services =>
         {
-            services.AddHttpRequestsInterceptor();
+            services.AddHttpClientFactoryInterceptor();
         });
     }
 }

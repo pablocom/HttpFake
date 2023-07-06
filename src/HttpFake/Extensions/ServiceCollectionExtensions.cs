@@ -5,7 +5,7 @@ namespace HttpFake.Extensions;
 
 public static class ServiceCollectionExtensions
 {
-    public static IServiceCollection AddHttpRequestsInterceptor(this IServiceCollection services)
+    public static IServiceCollection AddHttpClientFactoryInterceptor(this IServiceCollection services)
     {
         services.AddScoped<ConfiguredResponseInterceptionDelegatingHandler>()
             .AddSingleton<ConfiguredHttpRequestsInterceptor>();

@@ -4,7 +4,6 @@ namespace HttpFake;
 
 public sealed class ConfiguredHttpRequestsInterceptor
 {
-    private readonly ConcurrentBag<HttpRequestMessage> _receivedRequests = new();
     private readonly ConcurrentDictionary<Guid, ConfiguredResponse> _configuredRequests = new();
     private readonly InterceptionBehaviour _interceptionBehaviour;
 
@@ -25,8 +24,6 @@ public sealed class ConfiguredHttpRequestsInterceptor
 
     internal async Task<HttpRequestInterceptionResult> Intercept(HttpRequestMessage request)
     {
-        _receivedRequests.Add(request);
-
         foreach (var configuredRequest in _configuredRequests.Values)
         {
             if (await configuredRequest.IsMatching(request))
