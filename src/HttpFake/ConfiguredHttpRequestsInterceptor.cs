@@ -1,9 +1,11 @@
 using System.Collections.Concurrent;
+using HttpFake.Specifications;
 
 namespace HttpFake;
 
 public sealed class ConfiguredHttpRequestsInterceptor
 {
+    private readonly ConcurrentBag<HttpRequestMessage> _receivedRequests = new();
     private readonly ConcurrentDictionary<Guid, ConfiguredResponse> _configuredRequests = new();
     private readonly InterceptionBehaviour _interceptionBehaviour;
 
@@ -24,6 +26,8 @@ public sealed class ConfiguredHttpRequestsInterceptor
 
     internal async Task<HttpRequestInterceptionResult> Intercept(HttpRequestMessage request)
     {
+        _receivedRequests.Add(request);
+
         foreach (var configuredRequest in _configuredRequests.Values)
         {
             if (await configuredRequest.IsMatching(request))
@@ -35,13 +39,37 @@ public sealed class ConfiguredHttpRequestsInterceptor
 
         return HttpRequestInterceptionResult.NotIntercepted;
     }
-}
 
-internal sealed class ConfiguredRequestRegistrationRemover : IDisposable
-{
-    private readonly Action _callOnDispose;
+    public async Task AssertReceivedHttpRequestMatching(IEnumerable<IHttpRequestSpecification> specifications)
+    {
+        if (specifications == null || !specifications.Any())
+        {
+            throw new ArgumentException("You must provide at least one specification.", nameof(specifications));
+        }
 
-    internal ConfiguredRequestRegistrationRemover(Action toCall) => _callOnDispose = toCall;
+        foreach (var request in _receivedRequests)
+        {
+            if (await RequestMatchesAllSpecifications(request, specifications))
+            {
+                return;
+            }
+        }
 
-    public void Dispose() => _callOnDispose();
+        throw new InvalidOperationException("No received HTTP request matches all the provided specifications.");
+    }
+
+    private static async ValueTask<bool> RequestMatchesAllSpecifications(HttpRequestMessage request, 
+        IEnumerable<IHttpRequestSpecification> specifications)
+    {
+        foreach (var specification in specifications)
+        {
+            if (!await specification.IsSatisfiedBy(request))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 }
