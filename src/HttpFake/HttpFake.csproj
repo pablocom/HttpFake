@@ -4,6 +4,23 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+
+	<AssemblyName>$(MSBuildProjectName)</AssemblyName>
+	<Version>0.1.0-alpha</Version>
+	<PackageId>HttpFake</PackageId>
+	<Title>HttpFake</Title>
+	<PackageDescription>Easily stub and mock HTTP requests on your Microsoft.AspNetCore.Mvc.Testing projects</PackageDescription>
+	<PackageTags>Testing;Acceptance testing;End-to-end;HTTP mocking;</PackageTags>
+	<Description>
+		The aim of this package is to provide an easy way to fake HTTP requests on your web apis and arrange the configured responses
+		easily from your WebApi tests while using Microsoft.AspNetCore.Mvc.Testing.
+
+		Release notes - https://github.com/pablocom/HttpFake/releases
+	</Description>
+	<PackageLicenseFile>LICENSE</PackageLicenseFile>
+	<Authors>pablocom</Authors>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	  
   </PropertyGroup>
 
   <ItemGroup>
