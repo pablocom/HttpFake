@@ -11,7 +11,8 @@ public sealed class AbsolutePathSpecification : IHttpRequestSpecification
         _absolutePath = absolutePath;
     }
 
-    public ValueTask<bool> IsSatisfiedBy(HttpRequestMessage? request)
+    /// <inheritdoc />
+    public ValueTask<bool> IsSatisfiedBy(HttpRequestMessage? request, CancellationToken cancellationToken = default)
     {
         if (request?.RequestUri is null)
             return ValueTask.FromResult(false);

@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace HttpFake.SampleWebApi.UnitTests;
 
-[Collection(nameof(SampleWebApplicationTestsCollectionDefinition))]
+[Collection(nameof(SampleWebApplicationTestCollectionDefinition))]
 public sealed class WhenInterceptingHttpRequest
 {
     private readonly SampleWebApplicationFactory _webApplicationFactory;
@@ -33,5 +33,26 @@ public sealed class WhenInterceptingHttpRequest
         response.StatusCode.Should().Be(HttpStatusCode.OK, because: await response.Content.ReadAsStringAsync());
         var responseContent = await response.Content.ReadFromJsonAsync<DummyObject>();
         responseContent.Should().BeEquivalentTo(configuredResponse);
+    }
+
+    [Fact]
+    public async Task RecordsSentHttpRequests()
+    {
+        const string configuredRequestAbsolutePath = "/request/path";
+        
+        var interceptor = _webApplicationFactory.Services.GetRequiredService<ConfiguredHttpRequestsInterceptor>();
+        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
+            .WithAbsolutePath(configuredRequestAbsolutePath)
+            .Build());
+        
+        using var httpClient = _webApplicationFactory.CreateClient();
+        using var response = await httpClient.GetAsync("/record-sent-http-request");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: await response.Content.ReadAsStringAsync());
+        interceptor.AssertSentHttpRequestMatching(request =>
+        {
+            request.RequestUri!.AbsolutePath.Should().Be(configuredRequestAbsolutePath);
+            return true;
+        });
     }
 }

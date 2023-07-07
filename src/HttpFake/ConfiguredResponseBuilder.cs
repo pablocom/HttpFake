@@ -29,14 +29,16 @@ public sealed class ConfiguredResponseBuilder
         return this;
     }
     
-    public ConfiguredResponseBuilder WithSpecification(IHttpRequestSpecification specification)
+    public ConfiguredResponseBuilder WithAtLeastOneSpecification(params IHttpRequestSpecification[] specifications)
     {
-        ArgumentNullException.ThrowIfNull(specification);
+        ArgumentNullException.ThrowIfNull(specifications);
+        if (specifications.Length == 0)
+            throw new ArgumentException("Invalid empty specifications array for AtLeastOne constraint", nameof(specifications));
 
-        _specifications.Add(specification);
+        _specifications.Add(new AtLeastOneSpecification(specifications));
         return this;
     }
-
+    
     public ConfiguredResponseBuilder RespondWith(HttpResponseMessage response)
     {
         ArgumentNullException.ThrowIfNull(response);
