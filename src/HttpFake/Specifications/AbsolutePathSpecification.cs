@@ -6,9 +6,7 @@ public sealed class AbsolutePathSpecification : IHttpRequestSpecification
 
     public AbsolutePathSpecification(string absolutePath)
     {
-        ArgumentException.ThrowIfNullOrEmpty(absolutePath);
-
-        _absolutePath = absolutePath;
+        _absolutePath = absolutePath ?? throw new ArgumentNullException(nameof(absolutePath));
     }
 
     /// <inheritdoc />
