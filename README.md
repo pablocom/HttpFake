@@ -1,89 +1,35 @@
 # HttpFake
 
-HttpFake is a .NET library designed to intercept and manipulate `HttpClient` requests, making it easier to test and debug applications that heavily rely on HTTP communication. It can be seamlessly integrated with `Microsoft.AspNetCore.Mvc.Testing` to make it a powerful tool for integration testing in ASP.NET Core applications, and helps a lot in mocking and stubbing HTTP requests.
+HttpFake is a .NET library that helps you to intercept and configure responses for `HttpClient` requests, providing a powerful tool for integration testing in ASP.NET Core applications. This library is especially useful when used in conjunction with `Microsoft.AspNetCore.Mvc.Testing`, as it allows you to test your application's HTTP communication without sending real network requests.
 
 ## Getting Started
 
-To use HttpFake, first install it via NuGet:
+Firstly, install the HttpFake library via NuGet:
 
 ```shell
 Install-Package HttpFake
 ```
 
-Then, register the HttpFake services in your `Startup.cs`:
+## Usage with Microsoft.AspNetCore.Mvc.Testing
+
+Next, you need to register HttpFake services in your test startup configuration:
 
 ```csharp
-public void ConfigureServices(IServiceCollection services)
+public sealed class SampleWebApplicationFactory : WebApplicationFactory<IAssemblyMarker>
 {
-    services.AddHttpClientFactoryInterceptor();
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        builder.ConfigureTestServices(services =>
+        {
+            services.AddHttpClientFactoryInterceptor();
+        });
+    }
 }
 ```
 
-## Basic Usage
+You can use HttpFake with `Microsoft.AspNetCore.Mvc.Testing` to avoid sending actual HTTP requests during testing. This allows you to isolate your tests, providing consistent and controlled responses to HTTP requests.
 
-### Configuring Responses
-
-You can create pre-configured HTTP responses using the `ConfiguredResponseBuilder`. Here's an example:
-
-```csharp
-var content = new
-{
-    Message = "Hello, World!"
-};
-
-var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
-{
-    Content = new StringContent(JsonSerializer.Serialize(content), Encoding.UTF8, "application/json")
-};
-
-var builder = new ConfiguredResponseBuilder();
-builder.WithJsonContent(content).RespondWith(httpResponseMessage);
-
-var configuredResponse = builder.Build();
-
-var interceptor = new ConfiguredHttpRequestsInterceptor();
-interceptor.Register(configuredResponse);
-```
-
-In this example, any HTTP request that contains a JSON body matching `content` will receive a 200 OK response with the same `content`.
-
-### Intercepting Requests
-
-The `ConfiguredHttpRequestsInterceptor` holds the registered configured responses and matches them against each incoming request:
-
-```csharp
-var interceptor = new ConfiguredHttpRequestsInterceptor();
-
-// Register a configured response...
-var configuredResponse = ...
-interceptor.Register(configuredResponse);
-
-// Intercept a request...
-var httpRequestMessage = ...
-var result = await interceptor.Intercept(httpRequestMessage);
-
-if (result.HasMatchedWithConfiguredResponse)
-{
-    // The request matches the configured response...
-}
-```
-
-### Asserting Sent Requests
-
-You can assert whether any sent HTTP request matches a particular condition using the `AssertSentHttpRequestMatching` method:
-
-```csharp
-var interceptor = new ConfiguredHttpRequestsInterceptor();
-
-// Assert that at least one request was sent to a particular URL...
-interceptor.AssertSentHttpRequestMatching(request => request.RequestUri == "https://example.com/api");
-```
-
-## Using with Microsoft.AspNetCore.Mvc.Testing
-
-You can integrate HttpFake with `Microsoft.AspNetCore.Mvc.Testing` to test your ASP.NET Core applications without needing to send real HTTP requests. This is great for unit tests or integration tests where you want to isolate certain parts of your application.
-
-Here is an example:
+Below is an example of how to set up and use HttpFake within a test:
 
 ```csharp
 [Collection(nameof(SampleWebApplicationTestCollectionDefinition))]
@@ -121,12 +67,12 @@ public sealed class WhenInterceptingHttpRequest
 }
 ```
 
-In this example, the HTTP GET request to `"/configured-request-by-absolute-path"` is intercepted and a pre-configured response is returned.
+In this example, the HTTP GET request to `"/configured-request-by-absolute-path"` is intercepted and a pre-configured response is returned. This is done by registering a configured response for the absolute path `/absolute/path`.
 
 ## Contributing
 
-We welcome contributions! Please submit a pull request with any enhancements, bug fixes, or other contributions.
+HttpFake is an open-source project and we welcome contributions! Feel free to submit a pull request with enhancements, bug fixes, or other improvements.
 
 ## License
 
-HttpFake is licensed under the MIT License.
+HttpFake is licensed under the MIT License. For more information, please refer to the LICENSE file in the repository.
