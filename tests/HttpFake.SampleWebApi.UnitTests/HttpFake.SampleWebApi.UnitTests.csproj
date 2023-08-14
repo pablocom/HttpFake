@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\src\HttpFake\HttpFake.csproj" />
+      <ProjectReference Include="..\..\src\HttpFake.AspNetCore.Mvc.Testing\HttpFake.AspNetCore.Mvc.Testing.csproj" />
       <ProjectReference Include="..\HttpFake.SampleWebApi\HttpFake.SampleWebApi.csproj" />
     </ItemGroup>
 

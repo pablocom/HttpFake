@@ -34,19 +34,16 @@ public sealed class JsonContentSpecification : IHttpRequestSpecification
         if (request?.Content is null)
             return false;
 
-        var requestContentObject = await request.Content.ReadFromJsonAsync<Dictionary<string, JsonElement>>(
-            cancellationToken: cancellationToken);
-        if (requestContentObject == null || _content.Count != requestContentObject.Count) 
+        var requestContent = await request.Content.ReadFromJsonAsync<Dictionary<string, JsonElement>>(cancellationToken: cancellationToken);
+        if (requestContent is null || _content.Count != requestContent.Count) 
             return false;
 
         if (!_caseSensitive)
-        {
-            requestContentObject = new Dictionary<string, JsonElement>(requestContentObject, StringComparer.OrdinalIgnoreCase);
-        }
+            requestContent = new Dictionary<string, JsonElement>(requestContent, StringComparer.OrdinalIgnoreCase);
 
         foreach (var keyValuePair in _content)
         {
-            if (!requestContentObject.TryGetValue(keyValuePair.Key, out var value) || 
+            if (!requestContent.TryGetValue(keyValuePair.Key, out var value) || 
                 keyValuePair.Value.ToString() != value.ToString()) 
                 return false;
         }

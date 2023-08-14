@@ -1,23 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	  <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
-	  <ImplicitUsings>enable</ImplicitUsings>
-	  <Nullable>enable</Nullable>
+    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
 
 	<AssemblyName>$(MSBuildProjectName)</AssemblyName>
-	<Version>1.0.1</Version>
+	<Version>1.0.2</Version>
 	<PackageId>HttpFake</PackageId>
 	<Title>HttpFake</Title>
 	<PackageDescription>Easily stub and mock HTTP requests on your Microsoft.AspNetCore.Mvc.Testing projects</PackageDescription>
-	<PackageTags>Testing;Acceptance testing;End-to-end;HTTP mocking;</PackageTags>
+	<PackageTags>Testing;Acceptance testing;HTTP mocking;HttpClient</PackageTags>
 	<Description>
-		The aim of this package is to provide an easy way to fake HTTP requests on your web apis and arrange the configured responses
-		easily from your WebApi tests while using Microsoft.AspNetCore.Mvc.Testing.
-
+		The aim of this package is to provide an easy way to mock and stub HTTP requests.
 		Release notes - https://github.com/pablocom/HttpFake/releases
 	</Description>
-	<PackageLicenseUrl>https://github.com/pablocom/HttpFake/blob/d6009fa70bf819e3584b03469113f8ec8a34e37d/README.md</PackageLicenseUrl>
+	<PackageLicenseUrl>https://github.com/pablocom/HttpFake/blob/main/LICENSE</PackageLicenseUrl>
 	<Authors>pablocom</Authors>
 	<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	  
@@ -27,9 +25,4 @@
     <InternalsVisibleTo Include="HttpFake.UnitTests" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
-  </ItemGroup>
 </Project>

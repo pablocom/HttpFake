@@ -16,7 +16,7 @@ public sealed class WhenInterceptingHttpRequest
     }
     
     [Fact]
-    public async Task AvoidsSendingHttpRequestThroughTheNetworkAndReturnsConfiguredResponse()
+    public async Task AvoidsSendingItThroughTheNetworkAndReturnsConfiguredResponse()
     {
         const string endpointPath = "/configured-request-by-absolute-path";
         var configuredResponse = new DummyObject(97, new DateTimeOffset(2023, 1, 23, 1, 2, 3, TimeSpan.Zero), "Text");
@@ -36,7 +36,7 @@ public sealed class WhenInterceptingHttpRequest
     }
 
     [Fact]
-    public async Task RecordsSentHttpRequests()
+    public async Task AssertsAnyRequestSentSatisfiesPredicate()
     {
         const string configuredRequestAbsolutePath = "/request/path";
         
@@ -54,5 +54,23 @@ public sealed class WhenInterceptingHttpRequest
             request.RequestUri!.AbsolutePath.Should().Be(configuredRequestAbsolutePath);
             return true;
         });
+    }
+    
+    [Fact]
+    public async Task ThrowsExceptionIfNoSentRequestSatisfiesPredicate()
+    {
+        const string nonSentRequestPath = "/non/request/path";
+        const string sentRequestPath = "/request/path";
+        var interceptor = _webApplicationFactory.Services.GetRequiredService<ConfiguredHttpRequestsInterceptor>();
+        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
+            .WithAbsolutePath(sentRequestPath)
+            .Build());
+        using var httpClient = _webApplicationFactory.CreateClient();
+        using var response = await httpClient.GetAsync("/record-sent-http-request");
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: await response.Content.ReadAsStringAsync());
+        
+        var action = () => interceptor.AssertSentHttpRequestMatching(request => request.RequestUri?.AbsolutePath == nonSentRequestPath);
+
+        action.Should().Throw<Exception>().WithMessage("No received HTTP request matches the provided predicate.");
     }
 }

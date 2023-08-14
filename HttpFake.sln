@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpFake.SampleWebApi", "te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpFake.SampleWebApi.UnitTests", "tests\HttpFake.SampleWebApi.UnitTests\HttpFake.SampleWebApi.UnitTests.csproj", "{A2E606D4-9B01-4D76-8359-A7556DE92B21}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HttpFake.AspNetCore.Mvc.Testing", "src\HttpFake.AspNetCore.Mvc.Testing\HttpFake.AspNetCore.Mvc.Testing.csproj", "{F7133382-2AB3-43F0-9DA7-74EE74CCA257}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{A2E606D4-9B01-4D76-8359-A7556DE92B21}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2E606D4-9B01-4D76-8359-A7556DE92B21}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2E606D4-9B01-4D76-8359-A7556DE92B21}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7133382-2AB3-43F0-9DA7-74EE74CCA257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7133382-2AB3-43F0-9DA7-74EE74CCA257}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7133382-2AB3-43F0-9DA7-74EE74CCA257}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7133382-2AB3-43F0-9DA7-74EE74CCA257}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -46,6 +52,7 @@ Global
 		{4DA89F1F-B242-4598-9218-2346BFA1F549} = {54F19F47-F1EE-42FE-84DB-2707C9144A17}
 		{3CB71291-50AB-4C2F-9EB6-BE18123AB863} = {54F19F47-F1EE-42FE-84DB-2707C9144A17}
 		{A2E606D4-9B01-4D76-8359-A7556DE92B21} = {54F19F47-F1EE-42FE-84DB-2707C9144A17}
+		{F7133382-2AB3-43F0-9DA7-74EE74CCA257} = {EF90B7A4-A7B0-42BE-AE84-0C937DD2C100}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8C3D29FE-18AF-4ECF-9ABD-A78AB9B0D7C7}

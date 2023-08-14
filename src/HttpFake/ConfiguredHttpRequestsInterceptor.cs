@@ -37,6 +37,34 @@ public sealed class ConfiguredHttpRequestsInterceptor
     }
 
     /// <summary>
+    /// Registers multiple <see cref="ConfiguredResponse"/>s to this interceptor.
+    /// </summary>
+    /// <param name="configuredResponses">The configured responses.</param>
+    /// <returns>An IDisposable that removes the registered configured responses when disposed.</returns>
+    public IDisposable Register(params ConfiguredResponse[] configuredResponses)
+    {
+        var configuredResponseIds = new List<Guid>(configuredResponses.Length);
+        
+        foreach (var response in configuredResponses)
+        {
+            var id = Guid.NewGuid();
+            var added = _configuredRequests.TryAdd(id, response);
+            if (!added)
+                throw new Exception("Could not register configured request");
+            
+            configuredResponseIds.Add(id);
+        }
+        
+        return new ConfiguredRequestRegistrationRemover(() =>
+        {
+            foreach (var id in configuredResponseIds)
+            {
+                _configuredRequests.Remove(id, out _);
+            }
+        });
+    }
+    
+    /// <summary>
     /// Intercepts an HTTP request and finds a matching configured response.
     /// </summary>
     /// <param name="request">The HTTP request.</param>
@@ -83,5 +111,14 @@ public sealed class ConfiguredHttpRequestsInterceptor
                 return;
         }
         throw new Exception("No received HTTP request matches the provided predicate.");
+    }
+
+    /// <summary>
+    /// Asserts asynchronously that there was a sent HTTP request matching the provided asynchronous predicate.
+    /// </summary>
+    public void Clear()
+    {
+        _receivedRequests.Clear();
+        _configuredRequests.Clear();
     }
 }

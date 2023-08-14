@@ -6,22 +6,25 @@ namespace HttpFake.UnitTests;
 public sealed class WhenInterceptingRequestByAbsolutePath
 {
     private static readonly Uri AnyBaseUri = new("https://pablocompany.com");
-    private static readonly HttpResponseMessage ConfiguredResponse = new(HttpStatusCode.Found);
+    private static readonly HttpResponseMessage ExpectedResponse = new(HttpStatusCode.Found);
 
     [Fact]
     public async Task MatchesRequestWithConfiguredResponseOnlyByAbsolutePath()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
-        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
+        using var _1 = interceptor.Register(new ConfiguredResponseBuilder()
+            .WithAbsolutePath("/api/non/matching/endpoint/path")
+            .Build());
+        using var _2 = interceptor.Register(new ConfiguredResponseBuilder()
             .WithAbsolutePath("/api/endpoint/path")
-            .RespondWith(ConfiguredResponse)
+            .RespondWith(ExpectedResponse)
             .Build());
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/api/endpoint/path?Something=more"));
         var interceptionResult = await interceptor.Intercept(request);
         
         interceptionResult.HasMatchedWithConfiguredResponse.Should().BeTrue();
-        interceptionResult.ConfiguredRequest!.Response.Should().Be(ConfiguredResponse);
+        interceptionResult.ConfiguredRequest!.Response.Should().Be(ExpectedResponse);
     }
     
     [Fact]
@@ -30,7 +33,7 @@ public sealed class WhenInterceptingRequestByAbsolutePath
         var requestsInterceptor = new ConfiguredHttpRequestsInterceptor();
         using var _ = requestsInterceptor.Register(new ConfiguredResponseBuilder()
             .WithAbsolutePath("/api/endpoint/path")
-            .RespondWith(ConfiguredResponse)
+            .RespondWith(ExpectedResponse)
             .Build());
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/api/endpoint/path/different"));
