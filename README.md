@@ -1,6 +1,6 @@
 # HttpFake
 
-HttpFake is a .NET library that helps you to intercept and configure responses for `HttpClient` requests, providing a powerful tool for integration testing in ASP.NET Core applications. This library is especially useful when used in conjunction with `Microsoft.AspNetCore.Mvc.Testing`, as it allows you to test your application's HTTP communication without sending real network requests. 
+HttpFake is a .NET library that helps you to intercept requests and configure responses for `HttpClient` requests, providing a powerful tool for integration testing in ASP.NET Core applications. This library is especially useful when used in conjunction with `Microsoft.AspNetCore.Mvc.Testing`, as it allows you to test your application's HTTP communication without sending real network requests. 
 Basically it adds a delegating handler to every HttpClient created with the HttpClientFactory that will perform the interception
 
 ## Getting Started
