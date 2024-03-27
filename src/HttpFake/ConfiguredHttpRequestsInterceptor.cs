@@ -9,7 +9,7 @@ namespace HttpFake;
 public sealed class ConfiguredHttpRequestsInterceptor
 {
     private readonly ConcurrentBag<HttpRequestMessage> _receivedRequests = new();
-    private readonly ConcurrentDictionary<Guid, ConfiguredResponse> _configuredRequests = new();
+    private readonly ConcurrentBag<ConfiguredResponse> _configuredRequests = new();
     private readonly InterceptionBehaviour _interceptionBehaviour;
 
     /// <summary>
@@ -28,12 +28,15 @@ public sealed class ConfiguredHttpRequestsInterceptor
     /// <returns>An IDisposable that removes the registered configured response when disposed.</returns>
     public IDisposable Register(ConfiguredResponse configuredResponse)
     {
-        var id = Guid.NewGuid();
-        var added = _configuredRequests.TryAdd(id, configuredResponse);
-        if (!added)
-            throw new Exception("Could not register configured request");
+        _configuredRequests.Add(configuredResponse);
+        
+        return new ConfiguredRequestRegistrationRemover(() =>
+        {
+            var isRemoved = _configuredRequests.TryTake(out _);
 
-        return new ConfiguredRequestRegistrationRemover(() => _configuredRequests.Remove(id, out _));
+            if (!isRemoved)
+                throw new Exception("Could not dispose the configured response");
+        });
     }
 
     /// <summary>
@@ -45,7 +48,7 @@ public sealed class ConfiguredHttpRequestsInterceptor
     {
         _receivedRequests.Add(request);
 
-        foreach (var configuredRequest in _configuredRequests.Values)
+        foreach (var configuredRequest in _configuredRequests)
         {
             if (await configuredRequest.IsMatching(request))
                 return HttpRequestInterceptionResult.ConfiguredResponseFound(configuredRequest);
@@ -64,6 +67,7 @@ public sealed class ConfiguredHttpRequestsInterceptor
     public void AssertSentHttpRequestMatching(Func<HttpRequestMessage, bool> predicate)
     {
         ArgumentNullException.ThrowIfNull(predicate);
+        
         if (_receivedRequests.Any(predicate))
             return;
 
@@ -77,6 +81,7 @@ public sealed class ConfiguredHttpRequestsInterceptor
     public async Task AssertSentHttpRequestMatchingAsync(Func<HttpRequestMessage, Task<bool>> predicate)
     {
         ArgumentNullException.ThrowIfNull(predicate);
+        
         foreach (var request in _receivedRequests)
         {
             if (await predicate(request))

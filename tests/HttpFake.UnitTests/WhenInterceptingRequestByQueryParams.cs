@@ -12,7 +12,7 @@ public sealed class WhenInterceptingRequestByQueryParams
     public async Task MatchesRequestWithConfiguredResponseOnlyByQueryParams()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
-        interceptor.Register(new ConfiguredResponseBuilder()
+        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
             .WithQueryParams(new Dictionary<string, string>
             {
                 { "First", "firstValue" },
@@ -32,7 +32,7 @@ public sealed class WhenInterceptingRequestByQueryParams
     public async Task DoesNotInterceptRequestIfQueryParamsAreNotPresentInUri()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
-        interceptor.Register(new ConfiguredResponseBuilder()
+        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
             .WithQueryParams(new Dictionary<string, string> 
             { 
                 { "First", "firstValue" },
@@ -52,7 +52,7 @@ public sealed class WhenInterceptingRequestByQueryParams
     public async Task DoesNotInterceptRequestIfAnyQueryParamValueIsNotEqual()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
-        interceptor.Register(new ConfiguredResponseBuilder()
+        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
             .WithQueryParams(new Dictionary<string, string>
             {
                 { "First", "firstValue" },
