@@ -15,3 +15,8 @@ public enum InterceptionBehaviour
     /// </summary>
     Lax = 1
 }
+
+public static class InterceptionRequestHeaders
+{
+    public const string InterceptionScope = "X-HttpFake-Interception-Scope";
+}

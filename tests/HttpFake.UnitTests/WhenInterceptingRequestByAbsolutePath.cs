@@ -1,5 +1,4 @@
 using System.Net;
-using FluentAssertions;
 
 namespace HttpFake.UnitTests;
 
@@ -12,31 +11,33 @@ public sealed class WhenInterceptingRequestByAbsolutePath
     public async Task MatchesRequestWithConfiguredResponseOnlyByAbsolutePath()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
-        using var _ = interceptor.Register(new ConfiguredResponseBuilder()
+        using var scope = interceptor.InitRequestInterceptionScope();
+        interceptor.Register(new ConfiguredResponseBuilder()
             .WithAbsolutePath("/api/endpoint/path")
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/api/endpoint/path?Something=more"));
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
         
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeTrue();
-        interceptionResult.ConfiguredRequest!.Response.Should().Be(ConfiguredResponse);
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeTrue();
+        interceptionResult.ConfiguredRequest!.Response.ShouldBe(ConfiguredResponse);
     }
     
     [Fact]
     public async Task DoesNotInterceptRequestIfAnySpecificationIsNotSatisfied()
     {
-        var requestsInterceptor = new ConfiguredHttpRequestsInterceptor();
-        using var _ = requestsInterceptor.Register(new ConfiguredResponseBuilder()
+        var interceptor = new ConfiguredHttpRequestsInterceptor();
+        using var scope = interceptor.InitRequestInterceptionScope();
+        interceptor.Register(new ConfiguredResponseBuilder()
             .WithAbsolutePath("/api/endpoint/path")
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/api/endpoint/path/different"));
-        var interceptionResult = await requestsInterceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
         
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeFalse();
-        interceptionResult.ConfiguredRequest.Should().BeNull();
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeFalse();
+        interceptionResult.ConfiguredRequest.ShouldBeNull();
     }
 }

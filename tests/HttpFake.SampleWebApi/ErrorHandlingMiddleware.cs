@@ -22,5 +22,3 @@ public sealed class ErrorHandlingMiddleware
         }
     }
 }
-
-public sealed record DummyObject(int Number, DateTimeOffset Timestamp, string Text);

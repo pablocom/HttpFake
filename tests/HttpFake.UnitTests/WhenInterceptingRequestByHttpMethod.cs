@@ -1,7 +1,5 @@
 using System.Net;
 using System.Net.Http.Json;
-using System.Text.Json;
-using FluentAssertions;
 using HttpFake.Specifications;
 
 namespace HttpFake.UnitTests;
@@ -15,32 +13,35 @@ public sealed class WhenInterceptingRequestByHttpMethod
     public async Task MatchesRequestWithConfiguredResponseOnlyByHttpMethod()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
+        using var scope = interceptor.InitRequestInterceptionScope();
+
         interceptor.Register(new ConfiguredResponseBuilder()
             .WithAtLeastOneSpecification(new HttpMethodSpecification(HttpMethod.Get))
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/api/endpoint"));
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
 
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeTrue();
-        interceptionResult.ConfiguredRequest!.Response.Should().Be(ConfiguredResponse);
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeTrue();
+        interceptionResult.ConfiguredRequest!.Response.ShouldBe(ConfiguredResponse);
     }
 
     [Fact]
     public async Task DoesNotInterceptRequestIfMethodIsNotEqual()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
+        using var scope = interceptor.InitRequestInterceptionScope();
         interceptor.Register(new ConfiguredResponseBuilder()
             .WithAtLeastOneSpecification(new HttpMethodSpecification(HttpMethod.Get))
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage(HttpMethod.Patch, new Uri(AnyBaseUri, "/api/endpoint/path?First=firstValue&Second=secondValue"));
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
 
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeFalse();
-        interceptionResult.ConfiguredRequest.Should().BeNull();
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeFalse();
+        interceptionResult.ConfiguredRequest.ShouldBeNull();
     }
 }
 
@@ -56,11 +57,12 @@ public sealed class WhenInterceptingRequestByJsonContent
     public async Task MatchesRequestWhenJsonContentMatches()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
+        using var scope = interceptor.InitRequestInterceptionScope();
         var expectedContent = new DummyContent("value");
         interceptor.Register(new ConfiguredResponseBuilder()
             .WithJsonContent(expectedContent)
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage
         {
@@ -68,21 +70,22 @@ public sealed class WhenInterceptingRequestByJsonContent
             RequestUri = AnyBaseUri,
             Content = JsonContent.Create(expectedContent)
         };
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
         
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeTrue();
-        interceptionResult.ConfiguredRequest!.Response.Should().Be(ConfiguredResponse);
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeTrue();
+        interceptionResult.ConfiguredRequest!.Response.ShouldBe(ConfiguredResponse);
     }
 
     [Fact]
     public async Task DoesNotInterceptRequestWhenJsonContentDoesNotMatch()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
+        using var scope = interceptor.InitRequestInterceptionScope();
         var expectedContent = new DummyContent("value");
         interceptor.Register(new ConfiguredResponseBuilder()
             .WithJsonContent(expectedContent)
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage
         {
@@ -90,9 +93,9 @@ public sealed class WhenInterceptingRequestByJsonContent
             RequestUri = AnyBaseUri,
             Content = JsonContent.Create(new DummyContent("different"))
         };
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
         
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeFalse();
-        interceptionResult.ConfiguredRequest.Should().BeNull();
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeFalse();
+        interceptionResult.ConfiguredRequest.ShouldBeNull();
     }
 }

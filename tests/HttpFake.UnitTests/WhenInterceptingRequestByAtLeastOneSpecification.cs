@@ -1,5 +1,4 @@
 using System.Net;
-using FluentAssertions;
 using HttpFake.Specifications;
 
 namespace HttpFake.UnitTests;
@@ -13,35 +12,37 @@ public sealed class WhenInterceptingRequestByAtLeastOneSpecification
     public async Task MatchesRequestWhenAtLeastOneSpecificationIsSatisfied()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
+        var scope = interceptor.InitRequestInterceptionScope();
         interceptor.Register(new ConfiguredResponseBuilder()
             .WithAtLeastOneSpecification(
                 new QueryParamsSpecification(new Dictionary<string, string> { { "First", "firstValue" } }), 
                 new AbsolutePathSpecification("/path"))
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/path?First=unmatched"));
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
         
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeTrue();
-        interceptionResult.ConfiguredRequest!.Response.Should().Be(ConfiguredResponse);
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeTrue();
+        interceptionResult.ConfiguredRequest!.Response.ShouldBe(ConfiguredResponse);
     }
 
     [Fact]
     public async Task DoesNotInterceptRequestWhenNoneOfTheSpecificationsAreSatisfied()
     {
         var interceptor = new ConfiguredHttpRequestsInterceptor();
+        using var scope = interceptor.InitRequestInterceptionScope();
         interceptor.Register(new ConfiguredResponseBuilder()
             .WithAtLeastOneSpecification(
                 new QueryParamsSpecification(new Dictionary<string, string> { { "First", "firstValue" } }), 
                 new AbsolutePathSpecification("/path"))
             .RespondWith(ConfiguredResponse)
-            .Build());
+            .Build(), scope);
 
         var request = new HttpRequestMessage(HttpMethod.Get, new Uri(AnyBaseUri, "/unmatched?First=unmatched"));
-        var interceptionResult = await interceptor.Intercept(request);
+        var interceptionResult = await interceptor.Intercept(request, scope.Id);
         
-        interceptionResult.HasMatchedWithConfiguredResponse.Should().BeFalse();
-        interceptionResult.ConfiguredRequest.Should().BeNull();
+        interceptionResult.HasMatchedWithConfiguredResponse.ShouldBeFalse();
+        interceptionResult.ConfiguredRequest.ShouldBeNull();
     }
 }
